@@ -1,0 +1,622 @@
+// put this on the first line alone to ignore the entire file: ~disabled
+/* multi-line comment
+// single line comment // also can come at end of a line
+// Examples and how to for Exoscript narrative events for Exocolonist
+	tabs are ignored
+=== storyID
+	~if requirement for the story to occur
+	~set change images, skills, memories, love etc
+	resultText displayed at start of story
+
+	* choiceText
+		~if requirements for choice to be visible
+		= choiceID
+		resultText if choice picked
+		~setif choice is picked
+		> jump to another choiceID within this story (execute sets, show choices, add a page break and/or append its resultText)
+
+	* choiceText
+		blah blah text ifs sets choiceID jumps etc
+		>> jump to another choiceID (execute sets, show choices, but do not show its resultText
+
+		** sub choiceText
+			blah blah text ifs sets choiceID jumps etc
+
+			*** sub-sub choiceText
+				blah blah text ifs sets choiceID jumps etc
+
+			*** sub-sub choiceText
+				blah blah text ifs sets choiceID jumps etc
+
+	* choiceText
+		blah blah page break:
+		-
+		~set happens after the page break
+		Text after the page break, functionally a nested choice for undo etc
+
+		>! jump with NO page break before it
+				
+	* choiceText
+	
+		// weight of 99 means 99/(99 + 1) chance of var_wonLottery = false
+		// so 1 in 100 chance of var_wonLottery = true
+		~setif random = 99 ? var_wonLottery = false : var_wonLottery = true
+	
+		blah blah text ifs sets choiceID jumps etc
+
+		[if age == 10 or age == 11 || age == 12]
+			age is 10 or 11 or 12
+		[elseif age < 14 and skill_toughness >= 10 and skill_combat >= 10 or age >= 14 and skill_toughness >= 30 && skill_combat >= 30]
+			age under 14 and toughness and combat are at least 10
+			or
+			age 14 or higher and toughness and combat are at least 30
+		[endif]
+		
+		[if age >= 15 ? she's at least 15]
+			
+		[if random]
+			"You simply _must_ aquire an invitation to the moonharvest ball this season."
+		[or]
+			"You won't _believe_ how many Kudos this dress cost to fabricate."
+		[|]
+			"I noticed you admiring my hair. I'm growing it out."
+		[endif]
+		
+		[if random!]
+			This is TRULY random every time EVEN on the same week
+		[else]
+			Used for character events you might see 2x in the same week
+		[end]
+		
+		[if random]
+			this is random
+		[else]
+			this is random equally likely
+		[or]
+			another way of saying else for random
+		[|]
+			also works
+		[else random = 3]
+			this x3 random weight
+		[or random = 5]
+			this x5 random weight
+		[else if season = pollen]
+			pollen
+		[elseif season = quiet]
+			quiet
+		[else if season = quiet && random = 5]
+			quiet and weight 5 if true
+		[end]
+		
+		
+		
+		
+			
+		[if random : hunting feral dogs|trying to find some clean drinking water|looking for a working sparkplug]
+	
+	
+*/
+
+
+
+=== simpleExample ==============================================
+~if location = none
+
+This is a basic example. It should work without game components like charas, skills, jobs, etc.
+
+* Can we go deeper?
+
+	Yes, choices can nest.
+	
+	** Here's the first choice
+		Still going...
+		
+		
+		*** Under that another nested choice
+			And deeper still
+		
+			
+			**** And again a nested choice
+				That's enough.
+		
+* Can I set a variable to remember later?
+	~set var_something = true
+	
+	Why yes you can! It will be remembered in Story.vars while the story is being executed.
+	
+	** Was that variable set to false?
+		~ifd var_something = false
+		
+		This choice will be disabled, because we set var_something above.
+	
+	** Are you sure it was set to false???
+		~if var_something = false
+		
+		This choice won't even be visible because it uses IF not IFD.
+	
+	** Was that variable set to true?
+		~ifd var_something = true
+		
+		Yes, it was.
+		
+* What about paging?
+	= pagingChoice
+
+	Let me tell you about paging. First rule is:
+	
+	-
+	
+	Well that's the only rule actually. Dashes alone on a line will cause a choice to be split into two, with "..." as the button text between them.
+		
+* Can I jump to another option?
+
+	Yes, how about this one:
+	
+	** Jump to hiddenChoice
+		> hiddenChoice
+	
+	** Jump to another choice
+		> pagingChoice
+	
+	** Jump back to the beginning
+		> start
+
+*= hiddenChoice
+
+	This choice is hidden and given the label "hiddenChoice".
+
+
+/*
+// storyID
+=== shovelExample ==============================================
+		
+	// must be shoveling dirt
+	~if job = shovel
+	//~if job = shovel or job = farm
+
+	// only fire on the 10th year, season quiet, week 2
+	~if month = 10-quiet-2
+
+	// vars disappear after this story is done
+	~set var_favoriteFoodToday = sausages
+	
+	// memories last for the whole game
+	~set mem_helloMom = true
+	
+	// groundhogs stick around between multiple games on one computer
+	~set hog_shoveledInPastLife = true
+	
+	~set skill_Toughness++
+	~set skill_toughness -= 3
+	~set love_cal++
+	
+	// dynamically set a var, or anything else to string, int or bool
+	~set var_found = call_findCollectibles(wood)
+
+	// can happen in any farming job (one of job or location or chara is required)
+	//~if location = geoponics
+
+	// only happens while talking to cal outside of a job and in any location
+	//~if chara = cal
+	// always chosen the first week it is available
+	//~if chara = high_anemone
+	// no speech bubble and selected last
+	//~if chara = low_mom
+	// hide speech bubbles for normal/high priority, used for birthdays
+	//~if chara = _high_nomi
+	//~if chara = _marz
+
+	// can't happen if shovelShip story has been seen
+	~if story_shovelShip = false
+	// shovelShip happened within last year (22 weeks)
+	// ~if story_shovelShip < 22
+	// happened and has been at least 3 weeks since it happened
+	// ~if story_shovelShip > 3
+	
+	// arbitrary stories can be invented and set (sets to current week)
+	~set story_madeUpStoryID
+	
+	// plots are disabled
+	// works like story_ but you define a plotID tag for an event within a story, 
+	// or collection of related stories that should not be too close together
+	// for ease of editing / rearranging stories
+	//~if plot_momGeo > 3
+	// will set the plot momGeo to the current week
+	// ~set plot_momGeo
+
+	// can only happen during first two years (10 and 11)
+	~if age < 12
+	// age = 15 means in year 15 or greater
+	// age == 15 means only in year 15 not later
+
+	// only in this season
+	~if season = quiet
+	// ~if season = pollen-start
+	// ~if season = pollen-end
+	// ~if season = pollen-mid
+	// ~if season = pollen-2
+
+	// need >= season or < season if getting stories from talking to people
+	// but need to tie year into season in that case because age >= 12, season >= pollen means 13-quiet is a match
+	//~if season >= pollen
+
+	// requires toughness ten or above 
+	// (age = 10 and love = 10 work the same way; mem, var, and hog must use >=)
+	// skill_toughness == 10 means exactly 10
+	~if skill_toughness >= 10
+
+	// skip if cal loves you a lot already
+	~if love_cal <= 10
+
+	// need to have not met mother yet
+	// vars will be kept forever unless they start with var_ instead
+	~if mem_helloMom = false
+	
+	// these will be applied to the entry point
+	// show this picture in background (defaults to current location)
+	// left, right, image, sprite set other images
+	~set bg = jungle
+
+	// groundhogs are memories remembered across multiple princesses in multiple games on one computer
+	~set hog_metMom
+
+	// show mom on the left
+	~set left = mom
+	
+	// if the left half is true, set the right half
+	~setif mem_dead_dad ? love_cal++
+	~setif mem_dead_mom ? var_who = dad : var_who = mom
+	
+	// same as setif but calls a function
+	~callif call_charaBirthday(tammy) ? charafact(tammy, birthday)
+
+	// show main character on the right
+	//~set right = me
+
+	// so we can play this story again infinitely
+	//~set shovelStart = false
+
+	// choiceID can be returned to using > (show resultText) or >> (don't show resultText)
+	// sets above it will be executed again in either case
+	// no need to set choiceID for entry choice, it defaults to "= start"
+	// = start
+
+	// all ~if and ~set above resultText are applied to this choice
+	// square braces are replaced with special characters at runtime
+	"Okay [Name], looks like you're working for your old lady. Any questions before you start moving that dirt?"
+
+	// [if] statements in text can be nested; line breaks and tabs are optional
+	// they can't contain ~set or options, only text and nested [dynamics]
+	// try to avoid breaking sentences like this though - they will be harder to translate
+	// bad:
+	// [if mem_work_geoponics >= 5:
+		// "By the way you've been doing a great job[if love_cal >= 50: and that Cal seems to like you dear]!"
+	// ]
+	// good:
+	[if mem_work_geoponics >= 5]
+		[if love_cal >= 50]
+			"By the way you've been doing a great job and that Cal seems to like you dear!"
+		[else]
+			"By the way you've been doing a great job!"
+		[end]
+	[end]
+	
+	I heard a secret! The person who loves you most is: [=call_mostlove]. Actually just kidding it's ME, your mom.
+	
+	How do you answer her?
+
+	* Don't we have machines for this?
+		~set bg = triffid.jpg
+		// tabs are ignored
+		// underscores denote italics. no bold
+		"Hey," Mom seems annoyed. "We're planetside now, and those movers won't work forever."
+		
+		She grips your forearm. "Use your _muscles_. Nature's hydraulic pistons."
+		
+		// after a page break, show resultText for =start again and execute its ~set blocks but ignore ~ifs
+		// >> means don't show the resultText again only the choices
+		>> start
+		
+	* Where do I move it?
+
+		"From over there," she points to a dirt pile, "to there." She points to an identical pile ten meters away. 
+		
+		You honestly can't tell the difference between them.
+		// > secretEnd executes after ~set, regardless of order
+		// ! after > means no page break
+		>! secretEnd
+		// ~set after resultText applied to the choice above
+		~set skill_rebellion - 1
+		
+		// ~if applied to choice above, regardless of order
+		~if skill_biology > 5
+		~set bg = red
+		
+	* Why not use hydroponics?
+		~set bg = moon
+		// every newline treated as a paragraph break regardless of line spacing or tabs
+		Your mom explains that yeah, on the ship we grew plants hydroponically, with their roots in water. She says it's much more hygenic that way, but uses too much energy so we have to grow things the old fashioned way.
+		You think she's kind of scared of the bugs and stuff that live in dirt.
+		
+		Hah!
+		
+		** Why so scared?
+			~set bg = none
+			She sticks a shovel in the ground. "Bugs, bacteria, fungi, disease". Your mom waves her arm at the distant jungle. "And who knows what else could be out there just waiting to infect our farms."
+			
+			*** Continue
+				// adds a blank continue button
+				You think your mom is strong (like, physically) but sometimes she can be kind of a wimp.
+				// >> means don't show the resultText again only the choices
+				>> start
+				
+	* Hug mom
+		// ~ifd means always show this but disable it if check fails
+		// if skill/age/love = 20 means at least 20 (aka >= 20 or > 19)
+		~ifd skill_empathy >= 20
+		> secretEnd
+		
+	* Test if statements
+		= iftest
+		Here's a test of the if statement system:
+		
+		[if var_one] one!
+		[elseif var_two] two!
+		[else]
+			neither one or two!
+		[endif]
+		
+		** one
+			=one
+			~set var_one = true
+			// go back up one level and show text again
+			> back
+			
+		** two
+			=two
+			~set var_two = true
+			// jump to =iftest and show text (same as > back in this case)
+			> iftest
+			
+		** oncetest
+			You'll only see this once! 
+			// can also use >>> to mean backonce and don't display text
+			// and startonce goes to the entry choice
+			// go back up one level, disable this choice (backonce), and don't display text (>>)
+			>> backonce
+			
+			// above is the same as (with a random number appended to the var name):
+			// ~if !var_once12345
+			// ~set var_once12345
+			// You'll only see this once! 
+			// >> iftest
+			
+			
+		** oncetest2
+			You can put page breaks before a backonce.
+			
+			-
+			
+			It will return to just before the last choice you made.
+			
+			-
+			
+			Like this!
+			
+			// same as ">> backonce" or "~if once" plus ">> iftest"
+			>>>
+			
+		** oncetest3
+			~if once
+			// ~set once and ~once also work
+			// this is the same as (with random numbers in the var name)
+			// ~if !var_once12345
+			// ~set var_once12345
+			
+			You'll only see this once!
+			
+			*** for when backonce won't do it
+				Because you are too deep! Pagebreaks work with backonce but choices do not.
+				
+				> iftest
+				
+				
+		** conditional
+			This jump goes to a different place depending on bravery:
+			
+			> if skill_bravery >= 50 ? one : two
+			
+			NOTE: currently broken!!! Page breaks are all messed up see dys's test stuff.
+			
+		** done
+			// will go to end label if one exists
+
+	* No lets just do this
+		~set bg = colony.jpg
+		// ~set bg = command
+		// if resultText is blank, will perform >hugMom jump immediately without a page break
+		> hugMom
+
+	// blank-named choices are always hidden
+	* 
+		// hidden choices can have a choiceID and can be jumped to, ignoring ~if and executing ~set
+		= hugMom
+		"That's my [kid|girl|boy]." Your arms ache after half an hour of work. Who knew shoveling dirt could be so exhausting.
+		~set mem_helloMom = true
+
+	// can also do blank jump choices on one line
+	*= secretEnd
+		~set mem_helloMom = true
+		~set skill_rebellion - 1
+		Mom hugs you back.
+		
+	*= end
+		// = end is a specially named hidden choice.
+		// it will always start with a page break right here, unless it has no text
+		// All dead-end options with no further choices will automatically jump to this as if they had "> end"
+		
+		This will be shown after a page break at the terminus of all paths in this event.
+		
+		-
+		
+		It can contain page breaks, but no choices or jumps to avoid infinite loops
+		
+
+// storyID starts the next story
+=== example_shovelShip ==============================================
+
+	// must be shoveling dirt
+	~if job = shovel
+
+	Mom put me to work moving wheelbarrow after wheelbarrow of dirt out of the ship's gardens. We're spreading it on top of the planet's soil so all the good earth bacteria can get in there and make it better.
+	
+	* Jump to another event
+		// end this story and start a new one
+		~call story(example_shovelShip2)
+		
+		
+=== example_shovelShip ==============================================
+	// may only be called directly
+	~if location = none
+
+	But that's a story for another day.
+	
+	
+=== example_anywhere ==============================================
+
+	// can happen anywhere (either location or job is required for every story)
+	~if location = all
+
+	// denotes the story can happen anywhere and has first priority, used for main plot events
+	//~if location = priority
+	
+	// if no repeat, every story will only play once
+	// repeat immediately (defaults to ~if repeat_months = 0):
+	~if repeat
+	// repeat every 3 weeks:
+	//~if repeat_months = 3
+	// repeat every season:
+	//~if repeat_season
+	//~if repeat_seasons
+	//~if repeat_seasons = 1
+	// repeat every 2nd year:
+	//~if repeat_years = 2
+	
+	// first time this event occurs (shortcut for ~if story_[thisStoryID] == false)
+	[if first]
+		This is the first time you've seen this story.
+	[else]
+		You've seen this event before.
+	[end]
+	
+	Walking back to the creche you see some friends. Anemone's playing sportsball with Marz. Tangent is reading on her tablet. Dys is sulking. You approach:
+
+	* Anemone and Marz
+		They invite you to join their game.
+		
+		** Kick ass
+			~ifd skill_toughness >= 20
+			They're impressed. This choice will be visible but disabled if you aren't tough enough.
+			
+		** Take names
+			~if skill_toughness >= 30
+			~set love_anemone++
+			~set love_marz++
+			They're VERY impressed. This option will be hidden if you aren't tough enough.
+			
+		** Try your best
+			You're ok I guess.
+
+	* Tangent
+		She ignores you.
+
+	* Dys
+		He slinks away.
+
+
+=== mapSpotTest ==============================================
+	// location in exploration maps in mapSpot type "start" high priority
+	~if mapspot = high_start
+	
+	// only in pollen season
+	~if season = pollen
+	
+	// the map sprite you click on or bump into looks like a cave, for explore mapspot events only
+	~set sprite = cave
+	
+	// image looks like a nearby shot of the current biome
+	~set bg = explore
+	
+	What a view.... to a kill.
+	
+	- 
+	
+	This is your first time outside the Colony during Pollen season. Just a few klicks east of the gates, the Valley of Vertigo opens up before you. It drew you here with its perfume; heady pink clouds of sweet musky scent that settle so thickly on the valley floor that you can barely see to the bottom. Even from up here, your eyes start to water.
+	
+	You stand for a moment and breathe in the intoxicating scent, until a wracking cough makes you replace your breathing mask. Whatever the plants are exuding down there, it isn't good for lungs.
+	
+	-
+	
+	// add a character after the page break
+	~set left = dys
+	
+	"Dys is here. That is me. See how I look against this backdrop?"
+	
+	-
+	
+	// change the background after the page break (clears all characters)
+	~set bg = command
+	
+	// must re-add dys, then add another character
+	~set left = dys
+	~set midright = tang
+	
+	"Hi I'm Tang. I'm speaking now because I arrived last."
+	
+	And Tang, who never leaves the colony. What is she even doing out here, with Dys, in this beautiful but dangerous place?
+	
+	-
+	
+	~set midright = none
+	
+	"Hey, it's me Dys again. My sister left so now I'm the one speaking."
+	
+	Tang may not intend to descend to the valley, instead conscripting you to do the hazardous work of fetching a particular sample she needs for her research. Or perhaps you've already breathed too much of the pollen, a mild toxin that is suspected to have hallucinatory effects.
+	
+	// page break
+	-
+	
+	~set speaker = anemone
+	
+	"Hi I'm Anemone! I'm speaking now, even if you can't see me!"
+	
+	If she is only a vision, why have you conjured her here?
+	
+	// page break
+	-
+	
+	// must have a page break before changing speaker or doing any other ~set
+	~set speaker = dys
+	
+	"Oh hi Anemone."
+	
+	
+	
+=== callsTest ==============================================
+	~if location = none
+	
+	~set var_whatever = call_getLove(tammy)
+	// I think this is broken don't use it
+	~setif call_getLove(tammy) > call_getLove(cal) ? bg = creche : bg = geoponics
+	~setif call_getLove(tammy) >= 2 ? left = tammy
+	
+	// this will fail with an error because >= does not work with calls on the right
+	//~setif call_getLove(cal) >= call_getLove(tammy) ? right = cal
+	
+	Tammy loves you [=var_whatever] much!
+	Cal loves you [=call_getLove(cal)] much!
+	
+	If Tammy loves you more get the creche! If Cal does get geoponics.
+
+	Can you see Tammy? If so she loves you 2 or more much.
+*/
