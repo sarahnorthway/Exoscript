@@ -172,6 +172,7 @@ public class Story {
 		Reset();
 		result.story = this;
 		StoryManager.SetResult(result);
+		result.RecordStory();
 
 		// pick a default bg image and possibly set the chara against it
 		result.SetDefaultImages();
@@ -536,11 +537,37 @@ public class Story {
 	/// <summary>
 	/// Called once at end of DataLoader.
 	/// Some validation must wait until all stories are loaded.
+	/// May need to set up a fake context to validate some tags properly.
 	/// </summary>
 	public static void ValidateAllStories() {
-		// // grab all memories from stories, also special ones from jobs and locations
-		// allMemories = new List<string>();
-		// allGroundhogs = new List<string>();
+		// to look for typos in IF statements referencing things that are never SET
+		allMemories = new List<string>();
+		allGroundhogs = new List<string>();
+		
+		// grab all memories set in all stories
+		foreach (Story story in allStories) {
+			foreach (StoryChoice choice in story.allChoices) {
+				foreach (StorySet set in choice.sets) {
+					if (set.type == StorySetType.memory) {
+						allMemories.AddSafe(set.stringID);
+						story.debugSetMemories.AddSafe(set.stringID);
+					} else if (set.type == StorySetType.groundhog) {
+						allGroundhogs.AddSafe(set.stringID);
+					}
+					if (set.elseSet != null) {
+						if (set.elseSet.type == StorySetType.memory) {
+							allMemories.AddSafe(set.elseSet.stringID);
+							story.debugSetMemories.AddSafe(set.elseSet.stringID);
+						} else if (set.elseSet.type == StorySetType.groundhog) {
+							allGroundhogs.AddSafe(set.elseSet.stringID);
+						}
+					}
+				}
+			}
+		}
+		
+		
+		// manually add memories that are never set in Exoscript
 		// foreach (Skill skill in Skill.allSkills) {
 		// 	// skill perk level reached
 		// 	allMemories.AddSafe(Fort.memSkillPerkPrefix + skill.skillID + 1);
@@ -571,45 +598,27 @@ public class Story {
 		// allGroundhogs.AddSafe(Fort.memEndingPrefix + "default");
 		// allGroundhogs.AddSafe(Fort.hogLastEnding);
 		// allGroundhogs.AddSafe(Fort.hogNumLives);
-		//
-		// // grab all memories from all stories
-		// foreach (Story story in allStories) {
-		// 	foreach (StoryChoice choice in story.allChoices) {
-		// 		foreach (StorySet set in choice.sets) {
-		// 			if (set.type == StorySetType.memory) {
-		// 				allMemories.AddSafe(set.stringID);
-		// 				story.debugSetMemories.AddSafe(set.stringID);
-		// 			} else if (set.type == StorySetType.groundhog) {
-		// 				allGroundhogs.AddSafe(set.stringID);
-		// 			}
-		// 			if (set.elseSet != null) {
-		// 				if (set.elseSet.type == StorySetType.memory) {
-		// 					allMemories.AddSafe(set.elseSet.stringID);
-		// 					story.debugSetMemories.AddSafe(set.elseSet.stringID);
-		// 				} else if (set.elseSet.type == StorySetType.groundhog) {
-		// 					allGroundhogs.AddSafe(set.elseSet.stringID);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-		//
-		// // need a dummy princess for validation
-		// bool createdDummyPrincess = false;
+		
+		
+		// // dummy content to avoid errors when validating before a savegame is loaded
+		// bool createdDummy = false;
 		// if (!Fort.isLoaded) {
-		// 	createdDummyPrincess = true;
+		// 	createdDummy = true;
 		// 	Fort.CreateBlankFort(true);
 		// }
-		//
-		// foreach (Story story in allStories) {
-		// 	story.ValidateAndFinish();
-		// }
-		//
-		// validatingStory = null;
-		// Fort.SetResult(null); // clear the dummy result
-		//
-		// // clear the dummy princess created for validation
-		// if (createdDummyPrincess) {
+		
+		
+		foreach (Story story in allStories) {
+			story.ValidateAndFinish();
+		}
+		
+		validatingStory = null;
+		
+		StoryManager.SetResult(null); // clear the dummy result
+		
+		
+		// // clear the dummy content created for validation
+		// if (createdDummy) {
 		// 	Fort.isLoaded = false;
 		// }
 	}

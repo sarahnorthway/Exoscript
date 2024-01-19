@@ -11,16 +11,16 @@ public static class StoryManager {
 	public static int currentGameMonth = 15;
 	
 	// which stories have been seen, and what month they were LAST seen
-	public static Dictionary<string, int> stories => new Dictionary<string, int>();
+	public static Dictionary<string, int> stories = new Dictionary<string, int>();
 
 	// for debugging, what stories were seen each month
-	public static Dictionary<int, List<string>> storiesLog => new Dictionary<int, List<string>>();
+	public static Dictionary<int, List<string>> storiesLog = new Dictionary<int, List<string>>();
 
 	// events of note eg important choices during stories, by month
-	public static StringDictionary memories => new StringDictionary();
+	public static StringDictionary memories = new StringDictionary();
 	
 	// variables which persist across all savegames
-	public static StringDictionary groundhogs => new StringDictionary();
+	public static StringDictionary groundhogs = new StringDictionary();
 
 	// set while executing a story, for StoryCalls to reference
 	private static Result _result = null;
